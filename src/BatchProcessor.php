@@ -2,6 +2,7 @@
 
 namespace Ang3\Component\Doctrine\ORM;
 
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -19,6 +20,31 @@ class BatchProcessor
         $this->entityManager = $entityManager;
     }
 
+    public function deleteBy(string $class, Criteria $criteria = null, array $options = []): int
+    {
+        $iterableResult = $this->iterateBy($class, $criteria);
+
+        return $this->remove($iterableResult, $options);
+    }
+
+    public function iterateBy(string $class, Criteria $criteria = null, array $options = []): IterableResult
+    {
+        $qb = $this->entityManager
+            ->createQueryBuilder()
+            ->select('this')
+            ->from($class, 'this');
+
+        if ($criteria) {
+            try {
+                $qb->addCriteria($criteria);
+            } catch (Query\QueryException $e) {
+                throw new \LogicException(sprintf('Failed to add criteria for batch iterations - %s', $e->getMessage()));
+            }
+        }
+
+        return $this->iterate($qb, $options);
+    }
+
     /**
      * @param QueryBuilder|Query $query
      */
@@ -32,25 +58,33 @@ class BatchProcessor
     /**
      * @param object[] $entities
      */
-    public function persist(iterable $entities, array $options = []): void
+    public function persist(iterable $entities, array $options = []): int
     {
         $entities = $this->iterateEntities($entities, $options);
+        $count = 0;
 
         foreach ($entities as $entity) {
             $this->entityManager->persist($entity);
+            ++$count;
         }
+
+        return $count;
     }
 
     /**
      * @param object[] $entities
      */
-    public function remove(iterable $entities, array $options = []): void
+    public function remove(iterable $entities, array $options = []): int
     {
         $entities = $this->iterateEntities($entities, $options);
+        $count = 0;
 
         foreach ($entities as $entity) {
             $this->entityManager->remove($entity);
+            ++$count;
         }
+
+        return $count;
     }
 
     public function getEntityManager(): EntityManagerInterface
