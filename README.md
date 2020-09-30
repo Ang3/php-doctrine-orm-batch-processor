@@ -18,6 +18,7 @@ Summary
         - [Iterate on entities](#iterate-on-entities)
         - [Bulk operations](#bulk-operations)
         - [Batch context](#batch-context)
+    - [Repository integration](#repository-integration)
 
 Installation
 ============
