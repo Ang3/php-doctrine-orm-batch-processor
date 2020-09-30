@@ -20,7 +20,7 @@ class BatchProcessor
         $this->entityManager = $entityManager;
     }
 
-    public function deleteBy(string $class, Criteria $criteria = null, array $options = []): int
+    public function removeBy(string $class, Criteria $criteria = null, array $options = []): int
     {
         $iterableResult = $this->iterateBy($class, $criteria);
 
@@ -101,6 +101,7 @@ class BatchProcessor
             'flush_auto' => true,
         ]));
 
-        yield from $batchProcess->iterate($entities);
+        yield from $batchProcess
+            ->iterate($entities);
     }
 }

@@ -19,11 +19,11 @@ trait BatchRepositoryTrait
      */
     protected $batchProcessor;
 
-    public function deleteBy(Criteria $criteria = null): int
+    public function removeBy(Criteria $criteria = null): int
     {
         return $this
             ->getBatchProcessor()
-            ->deleteBy($this->_class, $criteria);
+            ->removeBy($this->_class, $criteria);
     }
 
     public function iterateBy(Criteria $criteria = null): IterableResult

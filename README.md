@@ -83,6 +83,9 @@ You can process a large result without memory problems using the following appro
 /** @var \Doctrine\ORM\Query|\Doctrine\ORM\QueryBuilder $query */
 
 $iterableResult = $batchProcessor->iterate($query, $options = []);
+// Or, you can iterate by class and criteria:
+// $iterableResult = $batchProcessor->iterateBy(MyEntity::class, $criteria, $options = []);
+
 /** @var \Ang3\Component\Doctrine\ORM\IterableResult $iterableResult */
 
 foreach($iterableResult as $entity) {
@@ -94,6 +97,18 @@ foreach($iterableResult as $entity) {
 > Iterating results is not possible with queries that fetch-join a collection-valued association. 
 > The nature of such SQL result sets is not suitable for incremental hydration.
 > - [doctrine-project.org](https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/batch-processing.html#iterating-results)
+
+#### Iterate by class and criteria
+
+If you don't want to create a query to iterate, you can also iterate by class and criteria as below:
+
+```php
+/** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
+/** @var \Doctrine\Common\Collections\Criteria $criteria */
+$iterableResult = $batchProcessor->iterateBy(MyEntity::class, $criteria, $options = []);
+
+// ...
+```
 
 ### Bulk operations
 
@@ -108,6 +123,18 @@ $batchProcessor->persist($entities, $options = []);
 
 // Delete entities
 $batchProcessor->remove($entities, $options = []);
+```
+
+#### Delete entities by class and criteria
+
+If you don't want to create a query to iterate, you can also iterate by class and criteria as below:
+
+```php
+/** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
+/** @var \Doctrine\Common\Collections\Criteria $criteria */
+$nbDeleted = $batchProcessor->removeBy(MyEntity::class, $criteria, $options = []); // int
+
+// ...
 ```
 
 **Good to know**
@@ -126,5 +153,47 @@ Here is a list of all options you can pass to the methods of a batch processor:
 - ```clear_auto``` (bool) If enabled, the processor will clear the entity manager on X iterations (batch size) 
 [default: ```true```].
 
+Repository integration
+----------------------
+
+Last but not least, I suggest you to use the trait ```Ang3\Component\Doctrine\ORM\BatchRepositoryTrait``` 
+to be able to iterate or remove entities directly from your repositories:
+
+```php
+use Ang3\Component\Doctrine\ORM\BatchRepositoryTrait;
+use Doctrine\ORM\EntityRepository;
+
+class MyRepository extends EntityRepository
+{
+    use BatchRepositoryTrait;
+    
+    // ...
+}
+```
+
+By this way, the class name is automatically resolved.
+
+### Available methods
+
+**Delete entities by criteria**
+
+```php
+public function removeBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $options = []): int;
+```
+
+**Iterate on entities by criteria**
+
+```php
+public function iterateBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $options = []): \Ang3\Component\Doctrine\ORM\IterableResult
+```
+
+**Iterate on entities from a query or a query builder**
+
+```php
+/**
+ * @param \Doctrine\ORM\QueryBuilder|\Doctrine\ORM\Query $query
+ */
+public function iterate($query, array $options = []): \Ang3\Component\Doctrine\ORM\IterableResult
+```
 
 That's it!

@@ -35,8 +35,13 @@ class BatchProcess
     {
         if ($entities instanceof IterableResult) {
             $iterateOnBatchProcess = true;
-            $entities
-                ->getContext()
+            $context = $entities->getContext();
+            if ($context === $this->context) {
+                $context = clone $context;
+                $entities->setContext($context);
+            }
+
+            $context
                 ->disableFlushAuto()
                 ->disableClearAuto();
         } else {
