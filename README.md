@@ -19,6 +19,7 @@ Summary
         - [Bulk operations](#bulk-operations)
         - [Batch context](#batch-context)
     - [Repository integration](#repository-integration)
+    - [Symfony bundle](#symfony-bundle)
 
 Installation
 ============
@@ -39,30 +40,8 @@ Usage
 
 Get started
 -----------
- 
-There are two ways to get an instance of batch processor in your code.
 
-### Dependency injection
-
-In Symfony applications, just use the dependency injection:
-
-```php
-use Ang3\Component\Doctrine\ORM\BatchProcessor;
-
-class MyService
-{
-    private $batchProcessor;
-
-    public function __construct(BatchProcessor $batchProcessor)
-    {
-        $this->batchProcessor = $batchProcessor;
-    }
-}
-```
-
-### Use as standalone
-
-You can also use the processor as standalone by creating a new instance with an entity manager:
+You just have to create a new instance with an entity manager:
 
 ```php
 use Ang3\Component\Doctrine\ORM\BatchProcessor;
@@ -170,5 +149,11 @@ public function iterateBy(\Doctrine\Common\Collections\Criteria $criteria = null
  */
 public function iterate($query, array $options = []): \Ang3\Component\Doctrine\ORM\IterableResult
 ```
+
+Symfony bundle
+--------------
+
+The bundle [ang3/doctrine-orm-process-bundle](https://github.com/Ang3/doctrine-orm-process-bundle) 
+integrates this component and configures a batch processor service for each configured manager.
 
 That's it!

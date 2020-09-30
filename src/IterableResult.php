@@ -23,7 +23,11 @@ class IterableResult extends BatchProcess implements \IteratorAggregate
      */
     public function getIterator(): Generator
     {
-        yield from parent::iterate($this->query->iterate());
+        $iterator = parent::iterate($this->query->iterate());
+
+        foreach ($iterator as $value) {
+            yield $value[0];
+        }
     }
 
     public function getQuery(): Query

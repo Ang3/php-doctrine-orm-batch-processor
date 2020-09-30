@@ -4,6 +4,7 @@ namespace Ang3\Component\Doctrine\ORM;
 
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
 
 class BatchProcess
 {
@@ -31,7 +32,7 @@ class BatchProcess
         $this->context = BatchContext::create($options);
     }
 
-    public function iterate(iterable $entities): \Generator
+    public function iterate(iterable $entities): Generator
     {
         if ($entities instanceof IterableResult) {
             $iterateOnBatchProcess = true;
