@@ -1,5 +1,5 @@
 {
-  "name": "neosolva/php-doctrine-orm-batch-processor",
+  "name": "ang3/php-doctrine-orm-batch-processor",
   "type": "library",
   "homepage": "https://github.com/Ang3/php-doctrine-orm-batch-processor",
   "description": "Batch processor for Doctrine ORM entities",
