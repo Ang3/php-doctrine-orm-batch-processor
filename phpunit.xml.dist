@@ -12,7 +12,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="PHP API client tests">
+        <testsuite name="Doctrine batch processor tests">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
