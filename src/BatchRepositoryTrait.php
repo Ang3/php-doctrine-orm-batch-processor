@@ -6,11 +6,14 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 
 /**
  * @property EntityManagerInterface $_em
  * @property ClassMetadata          $_class
+ *
+ * @method QueryBuilder createQueryBuilder($alias, $indexBy = null)
  */
 trait BatchRepositoryTrait
 {
@@ -19,18 +22,28 @@ trait BatchRepositoryTrait
      */
     protected $batchProcessor;
 
-    public function removeBy(Criteria $criteria = null): int
+    /**
+     * @throws QueryException on invalid criteria
+     */
+    public function removeBy(Criteria $criteria = null, array $options = []): int
     {
+        $iterableResult = $this->iterateBy($criteria);
+
         return $this
             ->getBatchProcessor()
-            ->removeBy($this->_class, $criteria);
+            ->remove($iterableResult, $options);
     }
 
-    public function iterateBy(Criteria $criteria = null): IterableResult
+    /**
+     * @throws QueryException on invalid criteria
+     */
+    public function iterateBy(Criteria $criteria = null, array $options = []): IterableResult
     {
-        return $this
-            ->getBatchProcessor()
-            ->iterateBy($this->_class, $criteria);
+        $qb = $this
+            ->createQueryBuilder('this')
+            ->addCriteria($criteria);
+
+        return $this->iterate($qb, $options);
     }
 
     /**

@@ -99,18 +99,6 @@ foreach($iterableResult as $entity) {
 > The nature of such SQL result sets is not suitable for incremental hydration.
 > - [doctrine-project.org](https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/batch-processing.html#iterating-results)
 
-#### Iterate by class and criteria
-
-If you don't want to create a query to iterate, you can also iterate by class and criteria as below:
-
-```php
-/** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
-/** @var \Doctrine\Common\Collections\Criteria $criteria */
-$iterableResult = $batchProcessor->iterateBy(MyEntity::class, $criteria, $options = []);
-
-// ...
-```
-
 ### Bulk operations
 
 You can process a bulk insert/update or deletion without memory problems using the following approach:
@@ -124,18 +112,6 @@ $batchProcessor->persist($entities, $options = []);
 
 // Delete entities
 $batchProcessor->remove($entities, $options = []);
-```
-
-#### Delete entities by class and criteria
-
-If you don't want to create a query to iterate, you can also iterate by class and criteria as below:
-
-```php
-/** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
-/** @var \Doctrine\Common\Collections\Criteria $criteria */
-$nbDeleted = $batchProcessor->removeBy(MyEntity::class, $criteria, $options = []); // int
-
-// ...
 ```
 
 **Good to know**
@@ -171,8 +147,6 @@ class MyRepository extends EntityRepository
     // ...
 }
 ```
-
-By this way, the class name is automatically resolved.
 
 ### Available methods
 

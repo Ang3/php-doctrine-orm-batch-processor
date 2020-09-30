@@ -2,11 +2,11 @@
 
 namespace Ang3\Component\Doctrine\ORM;
 
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Generator;
+use InvalidArgumentException;
 
 class BatchProcessor
 {
@@ -20,45 +20,10 @@ class BatchProcessor
         $this->entityManager = $entityManager;
     }
 
-    public function removeBy(string $class, Criteria $criteria = null, array $options = []): int
-    {
-        $iterableResult = $this->iterateBy($class, $criteria);
-
-        return $this->remove($iterableResult, $options);
-    }
-
-    public function iterateBy(string $class, Criteria $criteria = null, array $options = []): IterableResult
-    {
-        $qb = $this->entityManager
-            ->createQueryBuilder()
-            ->select('this')
-            ->from($class, 'this');
-
-        if ($criteria) {
-            try {
-                $qb->addCriteria($criteria);
-            } catch (Query\QueryException $e) {
-                throw new \LogicException(sprintf('Failed to add criteria for batch iterations - %s', $e->getMessage()));
-            }
-        }
-
-        return $this->iterate($qb, $options);
-    }
-
     /**
-     * @param QueryBuilder|Query $query
+     * @param iterable|QueryBuilder|Query $entities
      */
-    public function iterate($query, array $options = []): IterableResult
-    {
-        $query = $query instanceof Query ? $query : $query->getQuery();
-
-        return new IterableResult($query, $options);
-    }
-
-    /**
-     * @param object[] $entities
-     */
-    public function persist(iterable $entities, array $options = []): int
+    public function persist($entities, array $options = []): int
     {
         $entities = $this->iterateEntities($entities, $options);
         $count = 0;
@@ -72,9 +37,9 @@ class BatchProcessor
     }
 
     /**
-     * @param object[] $entities
+     * @param iterable|QueryBuilder|Query $entities
      */
-    public function remove(iterable $entities, array $options = []): int
+    public function remove($entities, array $options = []): int
     {
         $entities = $this->iterateEntities($entities, $options);
         $count = 0;
@@ -87,6 +52,20 @@ class BatchProcessor
         return $count;
     }
 
+    /**
+     * @throws InvalidArgumentException when the query object is not valid
+     */
+    public function iterate(object $query, array $options = []): IterableResult
+    {
+        if (!($query instanceof Query || $query instanceof QueryBuilder)) {
+            throw $this->createInvalidQueryArgumentException('query', $query);
+        }
+
+        $query = $query instanceof Query ? $query : $query->getQuery();
+
+        return new IterableResult($query, $options);
+    }
+
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
@@ -94,14 +73,40 @@ class BatchProcessor
 
     /**
      * @internal
+     *
+     * @param mixed $entities
+     *
+     * @throws InvalidArgumentException when the argument $entities is not valid
      */
-    private function iterateEntities(iterable $entities, array $options = []): Generator
+    private function iterateEntities($entities, array $options = []): Generator
     {
+        if (!is_iterable($entities)) {
+            if (!($entities instanceof Query) && !($entities instanceof QueryBuilder)) {
+                throw $this->createInvalidQueryArgumentException('entities', $entities, 'iterable');
+            }
+
+            $entities = $this->iterate($entities, $options);
+        }
+
         $batchProcess = new BatchProcess($this->entityManager, array_merge($options, [
             'flush_auto' => true,
         ]));
 
-        yield from $batchProcess
-            ->iterate($entities);
+        yield from $batchProcess->iterate($entities);
+    }
+
+    /**
+     * @internal
+     *
+     * @param mixed                $actualValue
+     * @param string[]|string|null $allowedTypes
+     */
+    private function createInvalidQueryArgumentException(string $argumentName, $actualValue, $allowedTypes = null): InvalidArgumentException
+    {
+        $allowedTypes = is_array($allowedTypes) ? $allowedTypes : (array) $allowedTypes;
+        $expectedType = implode('|', array_unique(array_merge($allowedTypes, [Query::class, QueryBuilder::class])));
+        $actualType = is_object($actualValue) ? sprintf('instance of "%s"', get_class($actualValue)) : gettype($actualValue);
+
+        throw new InvalidArgumentException(sprintf('The argument $%s must be a value of type "%s", got %s.', $argumentName, $expectedType, $actualType));
     }
 }
