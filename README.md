@@ -63,8 +63,6 @@ You can process a large result without memory problems using the following appro
 /** @var \Doctrine\ORM\Query|\Doctrine\ORM\QueryBuilder $query */
 
 $iterableResult = $batchProcessor->iterate($query, $options = []);
-// Or, you can iterate by class and criteria:
-// $iterableResult = $batchProcessor->iterateBy(MyEntity::class, $criteria, $options = []);
 
 /** @var \Ang3\Component\Doctrine\ORM\IterableResult $iterableResult */
 
