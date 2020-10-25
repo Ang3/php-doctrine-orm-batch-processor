@@ -84,11 +84,15 @@ class BatchProcess
      */
     private function clear(int $key = null): void
     {
+        if (null !== $key && (1 == $key || 0 !== ($key % $this->context->getSize()))) {
+            return;
+        }
+
         if ($this->context->isFlushAutoEnabled()) {
             $this->entityManager->flush();
         }
 
-        if ($this->context->isClearAutoEnabled() && (null === $key || ($key > 1 && 0 === ($key % $this->context->getSize())))) {
+        if ($this->context->isClearAutoEnabled()) {
             $this->entityManager->clear();
         }
     }
