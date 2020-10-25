@@ -84,7 +84,7 @@ class BatchProcess
      */
     private function clear(int $key = null): void
     {
-        if (null !== $key && (1 == $key || 0 !== ($key % $this->context->getSize()))) {
+        if ($key && (1 === $key || 0 !== ($key % $this->context->getSize()))) {
             return;
         }
 
