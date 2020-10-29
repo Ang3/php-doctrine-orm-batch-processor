@@ -14,7 +14,7 @@ class TransactionalEntityBag
     private $entityManager;
 
     /**
-     * @var array
+     * @var array<string, array>
      */
     private $entities = [];
 
@@ -31,7 +31,7 @@ class TransactionalEntityBag
     /**
      * @throws OutOfBoundsException when the entity key was not found
      */
-    public function get(string $key): object
+    public function get(string $key): ?object
     {
         $entity = $this->entities[$key] ?? null;
 
@@ -39,13 +39,13 @@ class TransactionalEntityBag
             throw new OutOfBoundsException(sprintf('Transactional entity with key "%s" was not found', $key));
         }
 
-        return $entity['object'];
+        return $entity['object'] ?? null;
     }
 
     public function set(string $key, object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        $identifier = $classMetadata->getIdentifierValues($classMetadata);
+        $identifier = $classMetadata->getIdentifierValues($entity);
 
         $this->entities[$key] = [
             'object' => $entity,
@@ -80,7 +80,7 @@ class TransactionalEntityBag
                 $this->repositories[$entityClass] = $repository;
             }
 
-            $this->entities[$key] = $this->repositories[$entity['class']]->find($entity['id']);
+            $this->entities[$key]['object'] = $this->repositories[$entityClass]->find($entity['id']);
         }
     }
 }
