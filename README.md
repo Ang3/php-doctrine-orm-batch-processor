@@ -90,11 +90,6 @@ $batchProcessor->persist($entities, $context = []);
 $batchProcessor->remove($entities, $context = []);
 ```
 
-**Good to know**
-
-- The argument ```$entities``` could be an instance of ```Ang3\Component\Doctrine\ORM\IterableResult```.
-- Internally, the option ```flush_auto``` is enabled automatically.
-
 
 ### Batch context
 
