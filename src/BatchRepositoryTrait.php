@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
+use Generator;
 
 /**
  * @property EntityManagerInterface $_em
@@ -37,21 +38,21 @@ trait BatchRepositoryTrait
     /**
      * @throws QueryException on invalid criteria
      */
-    public function iterateBy(Criteria $criteria = null, array $options = []): IterableResult
+    public function iterateBy(Criteria $criteria = null, array $options = []): Generator
     {
         $qb = $this
             ->createQueryBuilder('this')
             ->addCriteria($criteria);
 
-        return $this->iterate($qb, $options);
+        yield from $this->iterate($qb, $options);
     }
 
     /**
      * @param QueryBuilder|Query $query
      */
-    public function iterate($query, array $options = []): IterableResult
+    public function iterate($query, array $options = []): Generator
     {
-        return $this
+        yield from $this
             ->getBatchProcessor()
             ->iterate($query, $options);
     }

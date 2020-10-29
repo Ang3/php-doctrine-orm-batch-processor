@@ -62,13 +62,12 @@ You can process a large result without memory problems using the following appro
 /** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
 /** @var \Doctrine\ORM\Query|\Doctrine\ORM\QueryBuilder $query */
 
-$iterableResult = $batchProcessor->iterate($query, $options = []);
-
-/** @var \Ang3\Component\Doctrine\ORM\IterableResult $iterableResult */
+/** @var \Generator $iterableResult */
+$iterableResult = $batchProcessor->iterate($query, $context = []);
 
 foreach($iterableResult as $entity) {
     // Do you stuff here...
-    // Use options to perform a flush automatically (see section "Batch context")
+    // Use context to perform a flush automatically (see section "Batch context")
 }
 ```
 
@@ -85,10 +84,10 @@ You can process a bulk insert/update or deletion without memory problems using t
 /** @var iterable $entities */
 
 // Insert/update entities
-$batchProcessor->persist($entities, $options = []);
+$batchProcessor->persist($entities, $context = []);
 
 // Delete entities
-$batchProcessor->remove($entities, $options = []);
+$batchProcessor->remove($entities, $context = []);
 ```
 
 **Good to know**
@@ -99,13 +98,46 @@ $batchProcessor->remove($entities, $options = []);
 
 ### Batch context
 
-Here is a list of all options you can pass to the methods of a batch processor:
+Here is a list of context parameters you can pass to the methods of a batch processor:
 
 - ```batch_size``` (int) Number of iterations before clearing the entity manager [default: ```20```].
 - ```flush_auto``` (bool) If enabled, the processor will flush the entity manager on X iterations (batch size) 
-[default: ```false```].
+[default: ```true```].
 - ```clear_auto``` (bool) If enabled, the processor will clear the entity manager on X iterations (batch size) 
 [default: ```true```].
+
+### Transactional entity bag
+
+*Added in v2.0* - Sometimes, you would want to keep in memory some entities during the process because 
+all entities are detached when the processor clears the entity manager. The entity bag trick has been developed 
+to register your *transactional entities* in a bag. Each time the process clears the entity manager, all 
+entities in the bag are automatically reloaded. Then, you can retrieve your entity with a *key* (the instance changed).
+
+You have to manipulate the process itself, and you can do that by creating a process manually:
+
+```php
+/** @var \Ang3\Component\Doctrine\ORM\BatchProcessor $batchProcessor */
+/** @var \Ang3\Component\Doctrine\ORM\BatchProcess $process */
+$process = $batchProcessor->createProcess($context = []);
+
+// Get the bag from the process
+$entityBag = $process->getTransactionalEntityBag();
+
+// Register your entity with a key
+$entityBag
+    ->add('entity_1', $myEntity1)
+    ->add('entity_2', $myEntity2)
+    // ...
+;
+
+// Persist entities
+/** @var iterable $entities */
+$process->persist($entities);
+
+$myEntity1 = $entityBag->get('entity_1');
+$myEntity2 = $entityBag->get('entity_2');
+// ...
+```
 
 Repository integration
 ----------------------
@@ -130,13 +162,13 @@ class MyRepository extends EntityRepository
 **Delete entities by criteria**
 
 ```php
-public function removeBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $options = []): int;
+public function removeBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $context = []): int;
 ```
 
 **Iterate on entities by criteria**
 
 ```php
-public function iterateBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $options = []): \Ang3\Component\Doctrine\ORM\IterableResult
+public function iterateBy(\Doctrine\Common\Collections\Criteria $criteria = null, array $context = []): \Generator;
 ```
 
 **Iterate on entities from a query or a query builder**
@@ -145,7 +177,7 @@ public function iterateBy(\Doctrine\Common\Collections\Criteria $criteria = null
 /**
  * @param \Doctrine\ORM\QueryBuilder|\Doctrine\ORM\Query $query
  */
-public function iterate($query, array $options = []): \Ang3\Component\Doctrine\ORM\IterableResult
+public function iterate($query, array $context = []): \Generator;
 ```
 
 Symfony bundle

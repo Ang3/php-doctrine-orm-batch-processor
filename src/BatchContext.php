@@ -14,7 +14,7 @@ class BatchContext
     /**
      * @var bool
      */
-    private $flushAuto = false;
+    private $flushAuto = true;
 
     /**
      * @var bool
@@ -25,7 +25,7 @@ class BatchContext
     {
         $instance = new self();
         $instance->setSize((int) ($options['batch_size'] ?? self::DEFAULT_SIZE));
-        $instance->setFlushAuto((bool) ($options['flush_auto'] ?? false));
+        $instance->setFlushAuto((bool) ($options['flush_auto'] ?? true));
         $instance->setClearAuto((bool) ($options['clear_auto'] ?? true));
 
         return $instance;
@@ -48,16 +48,6 @@ class BatchContext
         return $this->flushAuto;
     }
 
-    public function enableFlushAuto(): self
-    {
-        return $this->setFlushAuto(true);
-    }
-
-    public function disableFlushAuto(): self
-    {
-        return $this->setFlushAuto(false);
-    }
-
     public function setFlushAuto(bool $flushAuto): self
     {
         $this->flushAuto = $flushAuto;
@@ -68,16 +58,6 @@ class BatchContext
     public function isClearAutoEnabled(): bool
     {
         return $this->clearAuto;
-    }
-
-    public function enableClearAuto(): self
-    {
-        return $this->setClearAuto(true);
-    }
-
-    public function disableClearAuto(): self
-    {
-        return $this->setClearAuto(false);
     }
 
     public function setClearAuto(bool $clearAuto): self
