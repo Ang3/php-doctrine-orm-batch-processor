@@ -18,6 +18,7 @@ Summary
         - [Iterate on entities](#iterate-on-entities)
         - [Bulk operations](#bulk-operations)
         - [Batch context](#batch-context)
+        - [Transactional entity bag](#transactional-entity-bag)
     - [Repository integration](#repository-integration)
     - [Symfony bundle](#symfony-bundle)
 
