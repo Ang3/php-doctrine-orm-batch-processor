@@ -42,7 +42,7 @@ class TransactionalEntityBag
         return $entity['object'];
     }
 
-    public function set(string $key, object $entity): void
+    public function set(string $key, object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         $identifier = $classMetadata->getIdentifierValues($classMetadata);
@@ -52,6 +52,8 @@ class TransactionalEntityBag
             'class' => $classMetadata->getName(),
             'id' => $identifier,
         ];
+
+        return $this;
     }
 
     public function remove(string $key): void

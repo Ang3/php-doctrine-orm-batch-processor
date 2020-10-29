@@ -118,10 +118,10 @@ $process = $batchProcessor->createProcess($context = []);
 // Get the bag from the process
 $entityBag = $process->getTransactionalEntityBag();
 
-// Register your entity with a key
+// Register your entities with a unique key
 $entityBag
-    ->add('entity_1', $myEntity1)
-    ->add('entity_2', $myEntity2)
+    ->set('entity_1', $myEntity1)
+    ->set('entity_2', $myEntity2)
     // ...
 ;
 
@@ -129,6 +129,8 @@ $entityBag
 /** @var iterable $entities */
 $process->persist($entities);
 
+// Retrieve your entities from the bag
+// An \OutOfBoundsException exception is thrown if the key was not found.
 $myEntity1 = $entityBag->get('entity_1');
 $myEntity2 = $entityBag->get('entity_2');
 // ...

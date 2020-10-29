@@ -113,9 +113,23 @@ class BatchProcess
         return $this->transactionalEntityBag;
     }
 
+    public function setTransactionalEntityBag(TransactionalEntityBag $transactionalEntityBag): self
+    {
+        $this->transactionalEntityBag = $transactionalEntityBag;
+
+        return $this;
+    }
+
     public function getContext(): BatchContext
     {
         return $this->context;
+    }
+
+    public function setContext(BatchContext $context): self
+    {
+        $this->context = $context;
+
+        return $this;
     }
 
     /**
